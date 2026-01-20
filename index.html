@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>规则怪谈：第13号档案 (v2.1 修复版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Creepster&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #d4d4d4;
+            font-family: 'Noto Serif SC', serif;
+            overflow-x: hidden;
+        }
+        .creep-font { font-family: 'Creepster', cursive; }
+        .paper-texture {
+            background-color: #e3d5b8;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+            color: #2b2b2b;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+        .glitch-effect { animation: glitch 1s infinite; }
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+        .scanline {
+            width: 100%; height: 100px; z-index: 10;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(255, 0, 0, 0.1) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.1; position: absolute; bottom: 100%;
+            animation: scanline 10s linear infinite; pointer-events: none;
+        }
+        @keyframes scanline { 0% { bottom: 100%; } 100% { bottom: -100px; } }
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+        
+        .blood-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 50%, rgba(138, 0, 0, 0.4) 100%);
+            pointer-events: none; z-index: 5; opacity: 0; transition: opacity 0.5s;
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+        .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 relative text-sm md:text-base">
+
+    <div class="scanline"></div>
+    <div id="blood-overlay" class="blood-overlay"></div>
+
+    <!-- Initialization / Loading -->
+    <div id="loading" class="fixed inset-0 bg-black z-50 flex flex-col gap-4 items-center justify-center text-red-700 font-mono tracking-widest p-4 text-center">
+        <div class="text-2xl creep-font">INITIALIZING SYSTEM v2.1...</div>
+        <div id="loading-status" class="text-sm text-zinc-500">Connecting to secure server...</div>
+        <!-- Manual Override Button (Appears if stuck) -->
+        <button id="manual-start-btn" class="hidden mt-4 border border-red-900 px-4 py-2 text-red-500 hover:bg-red-900 hover:text-white transition">
+            FORCE CONNECT
+        </button>
+    </div>
+
+    <!-- Auth / Login Screen -->
+    <div id="login-screen" class="w-full max-w-md bg-zinc-900 border border-zinc-800 p-8 rounded shadow-2xl hidden">
+        <div class="text-center mb-8">
+            <h1 class="text-5xl text-red-600 mb-2 creep-font tracking-widest">FILE #13</h1>
+            <p class="text-zinc-500 text-xs tracking-[0.2em] uppercase">Status: <span class="text-green-600">ONLINE</span> (v2.1)</p>
+        </div>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs uppercase tracking-wider text-zinc-500 mb-1">调查员代号 (Name)</label>
+                <input type="text" id="username-input" class="w-full bg-zinc-800 border border-zinc-700 text-white p-3 rounded focus:outline-none focus:border-red-900 transition font-mono" placeholder="输入你的代号...">
+            </div>
+            <div>
+                <label class="block text-xs uppercase tracking-wider text-zinc-500 mb-1">档案室编号 (Room ID)</label>
+                <input type="text" id="room-input" class="w-full bg-zinc-800 border border-zinc-700 text-white p-3 rounded focus:outline-none focus:border-red-900 transition font-mono" placeholder="例如: 101">
+            </div>
+            <button id="join-btn" class="w-full bg-red-950 hover:bg-red-900 text-red-100 font-bold py-3 rounded transition duration-300 shadow-lg border border-red-900 mt-2">
+                进入档案室
+            </button>
+        </div>
+        <p class="mt-6 text-center text-zinc-600 text-xs">
+            警告：进入后，请严格遵守《员工守则》。<br>存活 10 回合即可撤离。
+        </p>
+    </div>
+
+    <!-- Lobby Screen -->
+    <div id="lobby-screen" class="w-full max-w-3xl bg-zinc-900 border border-zinc-700 p-6 rounded shadow-2xl hidden fade-in">
+        <div class="flex justify-between items-end mb-6 border-b border-zinc-800 pb-4">
+            <div>
+                <h2 class="text-2xl text-zinc-100 font-bold">档案室 <span id="lobby-room-id" class="text-red-600 font-mono"></span></h2>
+                <p class="text-zinc-500 text-sm mt-1">等待小队集结...</p>
+            </div>
+            <div id="lobby-status" class="flex items-center gap-2 text-xs text-green-500 font-mono">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                LIVE
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-black/40 p-4 rounded border border-zinc-800 min-h-[200px]">
+                <h3 class="text-zinc-400 uppercase text-xs tracking-widest mb-3 flex items-center gap-2">
+                    <i data-lucide="users" class="w-3 h-3"></i> 当前人员
+                </h3>
+                <ul id="player-list" class="space-y-2">
+                    <!-- Player Items injected here -->
+                </ul>
+            </div>
+            
+            <div class="flex flex-col justify-center items-center p-4 text-center border-l border-zinc-800">
+                <div class="mb-6 opacity-60">
+                    <i data-lucide="skull" class="w-12 h-12 text-red-900 mx-auto mb-2"></i>
+                    <p class="text-zinc-400 text-sm italic">"不要回头。哪怕你感觉后面有呼吸声。"</p>
+                </div>
+                
+                <div id="host-controls" class="hidden w-full">
+                    <button id="start-game-btn" class="w-full bg-red-900 hover:bg-red-800 text-white py-3 px-6 rounded font-bold transition shadow-[0_0_15px_rgba(153,27,27,0.4)] hover:shadow-[0_0_25px_rgba(153,27,27,0.6)] flex items-center justify-center gap-2">
+                        <i data-lucide="power" class="w-4 h-4"></i> 开启档案 (开始)
+                    </button>
+                    <p class="text-xs text-zinc-600 mt-2">你是房主。等待所有人就位后开始。</p>
+                </div>
+                <div id="waiting-msg" class="hidden text-red-800 animate-pulse font-mono text-sm border border-red-900/30 p-2 rounded bg-red-950/10">
+                    [等待房主权限...]
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="w-full max-w-7xl hidden min-h-[90vh] flex flex-col md:flex-row gap-4 fade-in">
+        
+        <!-- Left: The Rules (Sticky Note) -->
+        <div class="w-full md:w-1/4 paper-texture text-zinc-900 p-6 rounded shadow-lg transform rotate-[-1deg] relative overflow-y-auto max-h-[30vh] md:max-h-full border border-black/20">
+            <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -mt-3 w-12 h-6 bg-red-900/20 rotate-1 shadow-sm"></div> <!-- Tape -->
+            <h3 class="text-xl font-bold mb-4 text-center border-b-2 border-black/10 pb-2 flex items-center justify-center gap-2">
+                <i data-lucide="file-warning" class="w-5 h-5"></i> 员工生存守则
+            </h3>
+            <div id="rules-container" class="space-y-3 text-sm leading-relaxed font-semibold font-serif">
+                <!-- Rules injected here -->
+            </div>
+            <div class="mt-8 pt-4 border-t border-black/10 text-xs italic text-right opacity-70">
+                阅读并背诵。<br>- 人事部
+            </div>
+        </div>
+
+        <!-- Center: Main Gameplay Area -->
+        <div class="w-full md:w-1/2 flex flex-col gap-4 relative">
+            
+            <!-- Round Status Bar -->
+            <div class="flex justify-between items-center bg-zinc-900/80 p-2 rounded border border-zinc-800 text-xs font-mono uppercase tracking-wider text-zinc-500">
+                <span id="game-status-text">进行中...</span>
+                <span>目标: 存活 <span class="text-white">10</span> 回合</span>
+            </div>
+
+            <!-- Event Card -->
+            <div class="flex-grow bg-zinc-900 border border-zinc-700 p-6 rounded relative flex flex-col shadow-2xl overflow-hidden group">
+                <!-- Background Image (Optional/Abstract) -->
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-800/50 via-zinc-900 to-black z-0"></div>
+                
+                <div class="relative z-10 flex flex-col h-full">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="text-4xl text-zinc-700 font-bold opacity-20 select-none">EVENT</div>
+                        <div class="text-xs text-red-500 font-mono border border-red-900/50 px-2 py-1 rounded bg-red-950/20">
+                            ROUND <span id="round-display" class="text-lg font-bold">1</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-grow flex flex-col justify-center text-center">
+                        <div id="event-text" class="text-lg md:text-2xl leading-relaxed text-zinc-200 mb-8 font-serif">
+                            正在读取当前状态...
+                        </div>
+                        
+                        <!-- My Status (Mini) -->
+                        <div class="flex justify-center gap-4 mb-6 text-xs text-zinc-500 font-mono">
+                            <div class="flex items-center gap-1"><i data-lucide="heart" class="w-3 h-3 text-red-700"></i> SAN: <span id="my-san-val">100</span></div>
+                            <div class="flex items-center gap-1"><i data-lucide="backpack" class="w-3 h-3 text-yellow-700"></i> <span id="my-items-val">无</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Timer Bar -->
+                    <div class="w-full h-1 bg-zinc-800 rounded overflow-hidden mb-6">
+                        <div id="timer-bar" class="h-full bg-red-800 w-full transition-all duration-1000 shadow-[0_0_10px_red]"></div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div id="action-area" class="w-full grid grid-cols-1 gap-3">
+                        <!-- Buttons injected -->
+                    </div>
+                    <p id="wait-indicator" class="hidden text-center text-zinc-500 text-xs animate-pulse mt-4">已做出选择。等待其他人...</p>
+                </div>
+            </div>
+
+            <!-- Report Modal (Overlay) -->
+            <div id="report-modal" class="absolute inset-0 z-20 bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center p-8 hidden text-center border border-zinc-800 rounded">
+                <h4 class="text-red-600 creep-font text-3xl mb-4 tracking-widest">回合报告</h4>
+                <div id="report-content" class="text-zinc-300 text-sm mb-6 max-h-[60%] overflow-y-auto w-full text-left space-y-2 font-mono">
+                    <!-- Report injected here -->
+                </div>
+                <button id="close-report-btn" class="bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white px-6 py-2 rounded text-sm transition">
+                    继续前进
+                </button>
+            </div>
+        </div>
+
+        <!-- Right: Player Status -->
+        <div class="w-full md:w-1/4 bg-zinc-900 border border-zinc-800 p-4 rounded flex flex-col h-[400px] md:h-auto">
+            <h3 class="text-zinc-500 uppercase text-xs tracking-widest mb-4 border-b border-zinc-800 pb-2 flex items-center justify-between">
+                <span>队友状态</span>
+                <i data-lucide="activity" class="w-4 h-4"></i>
+            </h3>
+            <div id="ingame-player-list" class="space-y-3 overflow-y-auto flex-grow custom-scrollbar pr-1">
+                <!-- Players status injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Components -->
+    <div id="radio-btn" class="fixed bottom-6 right-6 z-30 hidden">
+        <button class="bg-zinc-800 border-2 border-yellow-700 hover:bg-zinc-700 text-yellow-600 p-4 rounded-full shadow-lg transition-transform hover:scale-110 group relative">
+            <i data-lucide="radio" class="w-8 h-8"></i>
+            <span class="absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span></span>
+        </button>
+    </div>
+
+    <div id="ai-chat-modal" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center hidden backdrop-blur-sm p-4">
+        <div class="w-full max-w-lg bg-zinc-900 border border-yellow-800 rounded shadow-2xl flex flex-col h-[60vh]">
+            <div class="p-4 border-b border-zinc-800 bg-zinc-950 flex justify-between items-center">
+                <div class="flex items-center gap-2 text-yellow-600"><i data-lucide="radio-receiver" class="w-5 h-5 animate-pulse"></i><span class="font-mono font-bold tracking-wider">SECURE_CHANNEL_13</span></div>
+                <button id="close-ai-btn" class="text-zinc-500 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div id="ai-chat-history" class="flex-grow p-4 overflow-y-auto bg-black/50 space-y-4 font-mono text-sm">
+                <div class="text-zinc-500 text-xs text-center border-b border-zinc-800 pb-2 mb-2">已连接到加密频段...</div>
+            </div>
+            <div class="p-4 border-t border-zinc-800 bg-zinc-950">
+                <form id="ai-chat-form" class="flex gap-2">
+                    <input type="text" id="ai-input" class="flex-grow bg-zinc-900 border border-zinc-700 text-white px-4 py-2 rounded focus:outline-none focus:border-yellow-700 placeholder-zinc-600" placeholder="发送消息..." autocomplete="off">
+                    <button type="submit" class="bg-yellow-900/50 hover:bg-yellow-800 text-yellow-200 px-4 py-2 rounded border border-yellow-800 transition"><i data-lucide="send" class="w-4 h-4"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="end-screen" class="fixed inset-0 bg-black/95 z-40 hidden flex flex-col items-center justify-center fade-in text-center p-6">
+        <div id="end-icon" class="mb-6"></div>
+        <h1 id="end-title" class="text-5xl md:text-7xl creep-font mb-4 tracking-widest"></h1>
+        <p id="end-reason" class="text-zinc-400 text-lg mb-8 max-w-xl leading-relaxed font-serif"></p>
+        <button onclick="location.reload()" class="bg-white text-black px-8 py-3 rounded font-bold hover:bg-zinc-300 transition uppercase tracking-wider">Main Menu</button>
+    </div>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        console.clear();
+        console.log("System booting...");
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, updateDoc, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        lucide.createIcons();
+
+        // --- Init ---
+        const firebaseConfig = {
+  apiKey: "AIzaSyCpu1t0FSuHyrFXbksI8synpehhf-VemDE",
+  authDomain: "guizeguaitan-2e9e7.firebaseapp.com",
+  projectId: "guizeguaitan-2e9e7",
+  storageBucket: "guizeguaitan-2e9e7.firebasestorage.app",
+  messagingSenderId: "4402832828",
+  appId: "1:4402832828:web:5f77820b9c36f228a837b9",
+  measurementId: "G-FRRM5MP58D"
+};
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const ARK_CONFIG = { url: "https://ark.cn-beijing.volces.com/api/v3/chat/completions", model: "ep-20251202113657-f9jtz", key: "91927eff-26b4-4a5a-8db5-fcf35b1ee6a5" };
+
+        let currentUser = null;
+        let currentRoomId = null;
+        let isHost = false;
+        let localPlayerState = { inventory: [] };
+        let lastReportRound = 0;
+        let currentEventText = "";
+        
+        // --- Game Data (Shortened for brevity, same logic) ---
+        const ITEMS = { FLASHLIGHT: { id: 'FLASHLIGHT', name: '老旧手电筒', icon: 'flashlight' }, AMULET: { id: 'AMULET', name: '染血护身符', icon: 'shield' }, PILLS: { id: 'PILLS', name: '镇静剂', icon: 'pill' } };
+        const GAME_DATA = {
+            rules: [{id:1,text:"红光闭眼"}, {id:2,text:"脚步静止"}, {id:3,text:"不回应呼唤"}, {id:4,text:"赞美血画"}, {id:5,text:"无猫论"}],
+            events: [
+                { id: 'red_light', text: "走廊灯光变成了红色。", options: [{label:"逃跑", type:'sanity_loss', val:15, msg:"撞墙了。"}, {label:"闭眼", type:'safe', msg:"安全通过。"}, {label:"用手电", reqItem:'FLASHLIGHT', type:'safe_item', msg:"只是油漆。"}] },
+                { id: 'footsteps', text: "身后有沉重脚步声。", options: [{label:"回头", type:'sanity_loss', val:30, msg:"看见了它。"}, {label:"跑", type:'damage', val:40, msg:"被抓住了。"}, {label:"不动", type:'safe', msg:"它离开了。"}] },
+                { id: 'painting', text: "画中人在流血。", options: [{label:"无视", type:'sanity_loss', val:10, msg:"被凝视。"}, {label:"赞美", type:'heal', val:10, msg:"它笑了。"}, {label:"擦拭", type:'sanity_loss', val:50, msg:"被抓伤。"}] },
+                { id: 'find_flashlight', text: "发现手电筒。", options: [{label:"拿走", type:'get_item', item:'FLASHLIGHT', msg:"获得手电。"}, {label:"离开", type:'safe', msg:"放弃。"}] },
+                { id: 'ghost_girl', text: "女孩在哭。", options: [{label:"询问", type:'sanity_loss', val:40, msg:"无脸女。"}, {label:"给护身符", reqItem:'AMULET', type:'item_loss', item:'AMULET', msg:"她消散了。"}, {label:"离开", type:'safe', msg:"无事发生。"}] },
+                { id: 'find_amulet', text: "发现干尸项链。", options: [{label:"拿走", type:'get_item', item:'AMULET', msg:"获得护身符。"}, {label:"祈祷", type:'heal', val:5, msg:"心安。"}] }
+            ]
+        };
+
+        // --- DOM ---
+        const dom = {
+            loading: document.getElementById('loading'),
+            loadingStatus: document.getElementById('loading-status'),
+            manualStart: document.getElementById('manual-start-btn'),
+            screens: { login: document.getElementById('login-screen'), lobby: document.getElementById('lobby-screen'), game: document.getElementById('game-screen'), end: document.getElementById('end-screen') },
+            inputs: { user: document.getElementById('username-input'), room: document.getElementById('room-input'), btn: document.getElementById('join-btn') },
+            lobby: { roomId: document.getElementById('lobby-room-id'), list: document.getElementById('player-list'), hostCtrl: document.getElementById('host-controls'), waitMsg: document.getElementById('waiting-msg'), startBtn: document.getElementById('start-game-btn') },
+            game: { eventText: document.getElementById('event-text'), actions: document.getElementById('action-area'), round: document.getElementById('round-display'), playerList: document.getElementById('ingame-player-list'), reportModal: document.getElementById('report-modal'), reportContent: document.getElementById('report-content'), closeReportBtn: document.getElementById('close-report-btn'), waitIndicator: document.getElementById('wait-indicator'), rules: document.getElementById('rules-container'), mySan: document.getElementById('my-san-val'), myItems: document.getElementById('my-items-val') },
+            ai: { btn: document.getElementById('radio-btn'), modal: document.getElementById('ai-chat-modal'), closeBtn: document.getElementById('close-ai-btn'), history: document.getElementById('ai-chat-history'), form: document.getElementById('ai-chat-form'), input: document.getElementById('ai-input') },
+            end: { title: document.getElementById('end-title'), reason: document.getElementById('end-reason'), icon: document.getElementById('end-icon') }
+        };
+
+        function showScreen(name) { Object.values(dom.screens).forEach(el => el.classList.add('hidden')); dom.screens[name].classList.remove('hidden'); }
+
+        // --- Auth with Timeout ---
+        const initAuth = async () => {
+            console.log("Authenticating...");
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+            console.log("Auth success: ", auth.currentUser.uid);
+        };
+
+        // Watchdog for loading
+        const loadTimeout = setTimeout(() => {
+            if (!dom.loading.classList.contains('hidden')) {
+                dom.loadingStatus.innerText = "Connection timed out. Try manual force.";
+                dom.manualStart.classList.remove('hidden');
+            }
+        }, 5000);
+
+        dom.manualStart.onclick = () => {
+             dom.loading.classList.add('hidden');
+             showScreen('login');
+        };
+
+        initAuth().then(() => {
+            clearTimeout(loadTimeout);
+            dom.loading.classList.add('hidden');
+            showScreen('login');
+        }).catch(e => {
+            console.error(e);
+            dom.loadingStatus.innerText = "Auth Failed: " + e.message;
+            dom.manualStart.classList.remove('hidden');
+        });
+
+        onAuthStateChanged(auth, (user) => { if (user) currentUser = user; });
+
+        // --- Join Logic ---
+        dom.inputs.btn.addEventListener('click', async () => {
+            const username = dom.inputs.user.value.trim() || `User-${Math.floor(Math.random()*100)}`;
+            const roomId = dom.inputs.room.value.trim();
+            if (!roomId) return alert("Please enter Room ID");
+            currentRoomId = roomId;
+            dom.inputs.btn.disabled = true;
+
+            try {
+                // PATH DEBUG LOGGING
+                const roomPath = `artifacts/${appId}/public/data/rooms/room_${roomId}`;
+                const playerPath = `artifacts/${appId}/public/data/room_${roomId}_players/${currentUser.uid}`;
+                console.log("Joining Room at:", roomPath);
+                console.log("Creating Player at:", playerPath);
+
+                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', `room_${roomId}`);
+                const playerRef = doc(db, 'artifacts', appId, 'public', 'data', `room_${roomId}_players`, currentUser.uid);
+
+                const roomSnap = await getDoc(roomRef);
+                if (!roomSnap.exists()) {
+                    isHost = true;
+                    await setDoc(roomRef, { status: 'LOBBY', currentRound: 0, currentEventIndex: -1, latestReport: "", hostId: currentUser.uid });
+                } else if (roomSnap.data().status !== 'LOBBY') {
+                    alert("Game in progress"); location.reload(); return;
+                }
+
+                await setDoc(playerRef, { uid: currentUser.uid, name: username, sanity: 100, inventory: [], status: 'ALIVE', isHost: isHost, lastAction: null });
+                setupListeners(roomId);
+                showScreen('lobby');
+                dom.lobby.roomId.textContent = roomId;
+            } catch (err) {
+                console.error("Join Error:", err);
+                alert("Error: " + err.message);
+                dom.inputs.btn.disabled = false;
+            }
+        });
+
+        function setupListeners(roomId) {
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', `room_${roomId}`);
+            const playersRef = collection(db, 'artifacts', appId, 'public', 'data', `room_${roomId}_players`);
+
+            onSnapshot(roomRef, (snap) => { if(snap.exists()) handleGameUpdate(snap.data()); });
+            onSnapshot(playersRef, (snap) => {
+                const players = [];
+                snap.forEach(d => players.push(d.data()));
+                updatePlayerList(players);
+                if(isHost && window.currentGameState === 'PLAYING') checkTurnEnd(players);
+            });
+        }
+
+        // --- Game Logic ---
+        dom.lobby.startBtn.addEventListener('click', async () => {
+            if (!isHost) return;
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', `room_${currentRoomId}`);
+            await updateDoc(roomRef, { status: 'PLAYING', currentRound: 1, currentEventIndex: Math.floor(Math.random() * GAME_DATA.events.length), latestReport: "祝好运。" });
+        });
+
+        function handleGameUpdate(data) {
+            window.currentGameState = data.status;
+            if (data.status === 'LOBBY') {
+                dom.lobby.hostCtrl.classList.toggle('hidden', !isHost);
+                dom.lobby.waitMsg.classList.toggle('hidden', isHost);
+            } else if (data.status === 'PLAYING') {
+                showScreen('game');
+                dom.ai.btn.classList.remove('hidden');
+                renderRules();
+                dom.game.round.textContent = data.currentRound;
+                if (data.latestReport && data.currentRound > lastReportRound) {
+                    lastReportRound = data.currentRound;
+                    showReport(data.latestReport);
+                    renderEvent(data.currentEventIndex);
+                    resetActionUI();
+                } else if (data.currentRound === 1 && lastReportRound === 0) {
+                    lastReportRound = 1;
+                    renderEvent(data.currentEventIndex);
+                }
+            } else if (data.status === 'ENDED') {
+                dom.ai.btn.classList.add('hidden');
+                showEndScreen(data.endType, data.endMsg);
+            }
+        }
+
+        function updatePlayerList(players) {
+            players.sort((a, b) => (a.uid === currentUser.uid ? -1 : (b.uid === currentUser.uid ? 1 : 0)));
+            const myData = players.find(p => p.uid === currentUser.uid);
+            if (myData) {
+                localPlayerState = myData;
+                dom.game.mySan.textContent = myData.sanity;
+                dom.game.mySan.className = myData.sanity < 30 ? 'text-red-600 font-bold' : 'text-zinc-200';
+                dom.game.myItems.textContent = myData.inventory.map(id => ITEMS[id]?.name).join(', ') || "无";
+                if (myData.status === 'DEAD') {
+                    dom.game.eventText.innerHTML = "<span class='text-red-800'>已死亡...</span>";
+                    dom.game.actions.innerHTML = "";
+                    document.body.classList.add('grayscale');
+                }
+            }
+            const render = (con, isGame) => con.innerHTML = players.map(p => {
+                const isMe = p.uid === currentUser.uid;
+                const waiting = (p.status === 'ALIVE' && !p.lastAction && isGame) ? '<span class="animate-pulse text-yellow-600">...</span>' : '';
+                return `<div class="flex justify-between p-2 ${isMe ? 'bg-zinc-800 border-l-2 border-red-600' : ''}"><div class="text-sm ${p.status==='DEAD'?'text-red-800':'text-zinc-300'}">${p.name} ${waiting}</div><div class="text-xs">SAN:${p.sanity}</div></div>`;
+            }).join('');
+            if (!dom.screens.lobby.classList.contains('hidden')) render(dom.lobby.list, false);
+            if (!dom.screens.game.classList.contains('hidden')) render(dom.game.playerList, true);
+        }
+
+        function renderRules() { if (dom.game.rules.innerHTML === '') dom.game.rules.innerHTML = GAME_DATA.rules.map(r => `<p class="mb-2 text-zinc-800">Rule ${r.id}: ${r.text}</p>`).join(''); }
+        
+        function renderEvent(idx) {
+            const evt = GAME_DATA.events[idx];
+            currentEventText = evt.text;
+            dom.game.eventText.textContent = evt.text;
+            dom.game.actions.innerHTML = '';
+            if (localPlayerState.status !== 'ALIVE') return;
+            evt.options.forEach((opt, i) => {
+                if (opt.reqItem && !localPlayerState.inventory.includes(opt.reqItem)) return;
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3 rounded border border-zinc-700 hover:border-red-600 bg-zinc-800 mb-2";
+                btn.innerHTML = `<span class="text-red-500 mr-2">►</span>${opt.label}`;
+                btn.onclick = () => submitAction(idx, i);
+                dom.game.actions.appendChild(btn);
+            });
+        }
+
+        async function submitAction(evtIdx, optIdx) {
+            dom.game.actions.classList.add('opacity-50', 'pointer-events-none');
+            dom.game.waitIndicator.classList.remove('hidden');
+            const playerRef = doc(db, 'artifacts', appId, 'public', 'data', `room_${currentRoomId}_players`, currentUser.uid);
+            await updateDoc(playerRef, { lastAction: { evtIdx, optIdx } });
+        }
+
+        function resetActionUI() { dom.game.actions.classList.remove('opacity-50', 'pointer-events-none'); dom.game.waitIndicator.classList.add('hidden'); }
+        function showReport(text) { dom.game.reportContent.innerHTML = text; dom.game.reportModal.classList.remove('hidden'); }
+        dom.game.closeReportBtn.onclick = () => dom.game.reportModal.classList.add('hidden');
+
+        // --- Resolution ---
+        let resolving = false;
+        async function checkTurnEnd(players) {
+            if (resolving) return;
+            const living = players.filter(p => p.status === 'ALIVE');
+            if (living.length === 0) return endGame('ALL_DEAD');
+            const roomSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms', `room_${currentRoomId}`));
+            const curEvtIdx = roomSnap.data().currentEventIndex;
+            if (living.every(p => p.lastAction)) {
+                resolving = true;
+                setTimeout(() => resolveRound(players, curEvtIdx), 500);
+            }
+        }
+
+        async function resolveRound(players, evtIdx) {
+            const batch = writeBatch(db);
+            const report = [];
+            let survivors = false;
+            const evt = GAME_DATA.events[evtIdx];
+
+            players.forEach(p => {
+                const ref = doc(db, 'artifacts', appId, 'public', 'data', `room_${currentRoomId}_players`, p.uid);
+                if (p.status !== 'ALIVE') { batch.update(ref, { lastAction: null }); return; }
+                survivors = true;
+                const act = p.lastAction;
+                const opt = evt.options[act.optIdx];
+                let dSan = opt.type==='sanity_loss' ? -opt.val : (opt.type==='heal'?opt.val:(opt.type==='damage'?-1000:0));
+                let outcome = opt.msg;
+                let inv = [...(p.inventory||[])];
+                if (opt.type==='get_item' && !inv.includes(opt.item)) inv.push(opt.item);
+                if (opt.type==='item_loss') inv = inv.filter(i=>i!==opt.item);
+                if (dSan < 0 && inv.includes('AMULET') && (p.sanity+dSan<=0)) { dSan=0; inv=inv.filter(i=>i!=='AMULET'); outcome+=" (护身符碎裂)"; }
+                
+                let newSan = Math.max(0, Math.min(100, p.sanity+dSan));
+                let status = newSan <= 0 ? 'DEAD' : 'ALIVE';
+                report.push(`${p.name}: ${outcome} (${dSan} SAN)`);
+                batch.update(ref, { sanity: newSan, status: status, inventory: inv, lastAction: null });
+            });
+
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', `room_${currentRoomId}`);
+            const roomData = (await getDoc(roomRef)).data();
+            if (roomData.currentRound >= 10 && survivors) return endGame('VICTORY');
+            
+            let nextEvt = (evtIdx + 1) % GAME_DATA.events.length;
+            batch.update(roomRef, { currentRound: roomData.currentRound + 1, currentEventIndex: nextEvt, latestReport: report.join('<br>') });
+            await batch.commit();
+            resolving = false;
+        }
+
+        async function endGame(type) {
+            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', `room_${currentRoomId}`);
+            await updateDoc(roomRef, { status: 'ENDED', endType: type, endMsg: type==='ALL_DEAD'?"全员阵亡":"逃出生天" });
+        }
+
+        function showEndScreen(type, msg) {
+            dom.screens.game.classList.add('hidden');
+            dom.screens.end.classList.remove('hidden');
+            dom.end.title.innerText = type==='ALL_DEAD'?"GAME OVER":"VICTORY";
+            dom.end.reason.innerText = msg;
+        }
+
+        // --- AI ---
+        dom.ai.btn.onclick = () => dom.ai.modal.classList.remove('hidden');
+        dom.ai.closeBtn.onclick = () => dom.ai.modal.classList.add('hidden');
+        dom.ai.form.onsubmit = async (e) => {
+            e.preventDefault();
+            const txt = dom.ai.input.value.trim();
+            if(!txt) return;
+            addMsg('user', txt); dom.ai.input.value='';
+            const loadId = addMsg('ai', '...', true);
+            try {
+                const res = await fetch(ARK_CONFIG.url, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json', 'Authorization':`Bearer ${ARK_CONFIG.key}`},
+                    body: JSON.stringify({ model: ARK_CONFIG.model, messages: [{role:"system", content:`你是在通风管的幸存者"老鼠"。规则:红光闭眼,脚步静止,画流血赞美。当前事件:${currentEventText}。请简短回答。`}, {role:"user", content:txt}] })
+                });
+                const data = await res.json();
+                updateMsg(loadId, data.choices[0].message.content);
+            } catch(err) {
+                updateMsg(loadId, "信号干扰... (API Error)");
+            }
+        };
+
+        function addMsg(role, txt, load) {
+            const div = document.createElement('div');
+            div.className = `p-2 mb-2 rounded ${role==='ai'?'bg-zinc-800 text-zinc-300':'bg-red-950 text-white ml-auto max-w-[80%]'}`;
+            div.innerHTML = txt;
+            dom.ai.history.appendChild(div);
+            return div;
+        }
+        function updateMsg(el, txt) { el.innerHTML = txt; }
+
+    </script>
+</body>
+</html>
