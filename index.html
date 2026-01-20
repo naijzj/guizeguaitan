@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>规则怪谈：第13号档案 (v5.0 最终版)</title>
+    <title>规则怪谈：第13号档案 (v6.0 视觉增强版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Creepster&family=Nosifer&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -47,6 +47,27 @@
         #jumpscare { pointer-events: none; opacity: 0; transition: opacity 0.1s; background: black; z-index: 100; }
         .face-flash { animation: flashFace 0.2s 2; }
         @keyframes flashFace { 0% { opacity: 0; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } 100% { opacity: 0; transform: scale(1); } }
+
+        /* Pixel Art Canvas */
+        #game-canvas {
+            image-rendering: pixelated; 
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0.8;
+            transition: opacity 0.5s;
+        }
+        .canvas-container {
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 16/9;
+            background: #050505;
+            border: 1px solid #333;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center relative text-sm md:text-base selection:bg-red-900 selection:text-white">
@@ -71,7 +92,7 @@
     <!-- MAIN MENU -->
     <div id="screen-menu" class="w-full max-w-md p-8 text-center z-10 relative">
         <h1 class="text-6xl text-red-800 creep-font tracking-widest mb-2 glitch-text cursor-default" data-text="FILE #13">FILE #13</h1>
-        <p class="text-zinc-600 text-xs tracking-[0.5em] uppercase mb-12 border-b border-red-900/30 pb-2 inline-block">v5.0 终极重制版</p>
+        <p class="text-zinc-600 text-xs tracking-[0.5em] uppercase mb-12 border-b border-red-900/30 pb-2 inline-block">v6.0 视觉增强版</p>
         
         <div class="space-y-6">
             <div class="relative group">
@@ -84,7 +105,7 @@
                     <div class="absolute inset-0 bg-red-950/20 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
                     <i data-lucide="bot" class="w-8 h-8 mx-auto mb-2 text-zinc-600 group-hover:text-red-500 transition-colors"></i>
                     <div class="font-bold text-zinc-400 group-hover:text-red-100 relative z-10">离线单人</div>
-                    <div class="text-[10px] text-zinc-700 mt-1">AI 队友模拟</div>
+                    <div class="text-[10px] text-zinc-700 mt-1">AI 队友 + 像素场景</div>
                 </button>
                 <button onclick="UI.toggleOnlineSetup()" class="group relative overflow-hidden bg-zinc-950 border border-zinc-800 p-4 hover:border-red-800 transition duration-500">
                     <div class="absolute inset-0 bg-red-950/20 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
@@ -147,18 +168,23 @@
             </div>
 
             <!-- Stage Content -->
-            <div class="flex-grow flex flex-col items-center justify-center p-8 relative">
-                <!-- Background Round Number -->
-                <div id="round-indicator" class="text-[15rem] font-bold text-red-900/5 select-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none creep-font">1</div>
+            <div class="flex-grow flex flex-col items-center justify-start p-8 relative overflow-y-auto">
+                
+                <!-- VISUAL SCENE VIEWPORT -->
+                <div class="canvas-container group cursor-crosshair">
+                    <canvas id="game-canvas" width="128" height="72"></canvas>
+                    <div class="absolute bottom-2 right-2 text-[8px] text-red-900/50 font-mono pointer-events-none">REC ● [CAM-13]</div>
+                    <div class="absolute inset-0 bg-red-900/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none mix-blend-overlay"></div>
+                </div>
 
                 <div class="relative z-10 w-full max-w-lg text-center">
-                    <div id="event-type-badge" class="inline-block px-2 py-1 border border-red-900/50 text-red-600 text-[10px] tracking-[0.2em] mb-6 bg-black">异常侦测</div>
+                    <div id="event-type-badge" class="inline-block px-2 py-1 border border-red-900/50 text-red-600 text-[10px] tracking-[0.2em] mb-4 bg-black">异常侦测</div>
                     
                     <div id="ai-loading" class="hidden text-red-800 font-mono text-xs mb-4 ai-generating">
                         [AI 重构现实中...]
                     </div>
 
-                    <h2 id="event-desc" class="text-xl md:text-2xl font-serif text-zinc-300 leading-relaxed mb-10 min-h-[100px] flex items-center justify-center drop-shadow-[0_2px_10px_rgba(0,0,0,1)]">
+                    <h2 id="event-desc" class="text-lg md:text-xl font-serif text-zinc-300 leading-relaxed mb-8 flex items-center justify-center drop-shadow-[0_2px_10px_rgba(0,0,0,1)] min-h-[60px]">
                         等待信号接入...
                     </h2>
                     
@@ -188,6 +214,7 @@
                         <div id="my-role-display" class="text-sm text-zinc-300 font-bold">---</div>
                     </div>
                 </div>
+                <div id="round-display-sm" class="text-zinc-700 font-bold text-lg">R:1</div>
             </div>
         </div>
 
@@ -227,7 +254,7 @@
     <!-- LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, updateDoc, serverTimestamp, addDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- 1. FIREBASE SETUP ---
@@ -274,7 +301,143 @@
             { seed: "画中人流血泪", type: "painting", options: [{txt:"赞美画作", type:"heal", val:15}, {txt:"擦拭血迹", type:"bad", val:30}, {txt:"无视离开", type:"bad", val:10}] }
         ];
 
-        // --- 3. UI CONTROLLER ---
+        // --- 3. PIXEL VISUALS ENGINE (NEW) ---
+        const Visuals = {
+            ctx: null,
+            width: 128,
+            height: 72,
+            
+            init: () => {
+                const canvas = document.getElementById('game-canvas');
+                Visuals.ctx = canvas.getContext('2d');
+                // Disable smoothing for pixel art look
+                Visuals.ctx.imageSmoothingEnabled = false;
+                // Start generic animation loop
+                requestAnimationFrame(Visuals.loop);
+            },
+
+            // Drawing Helpers
+            clear: () => {
+                Visuals.ctx.fillStyle = '#050505';
+                Visuals.ctx.fillRect(0, 0, Visuals.width, Visuals.height);
+            },
+            
+            drawHallway: (color = '#1a1a1a') => {
+                const ctx = Visuals.ctx;
+                const w = Visuals.width;
+                const h = Visuals.height;
+                const cx = w / 2;
+                const cy = h / 2;
+
+                // Perspective lines
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1;
+                
+                // Floor
+                ctx.beginPath();
+                ctx.moveTo(0, h); ctx.lineTo(cx, cy); ctx.lineTo(w, h);
+                ctx.stroke();
+
+                // Ceiling
+                ctx.beginPath();
+                ctx.moveTo(0, 0); ctx.lineTo(cx, cy); ctx.lineTo(w, 0);
+                ctx.stroke();
+
+                // End door
+                ctx.fillStyle = '#000';
+                ctx.fillRect(cx - 10, cy - 15, 20, 30);
+                ctx.strokeRect(cx - 10, cy - 15, 20, 30);
+            },
+
+            noise: () => {
+                const ctx = Visuals.ctx;
+                for (let i = 0; i < 100; i++) {
+                    const x = Math.random() * Visuals.width;
+                    const y = Math.random() * Visuals.height;
+                    ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            },
+
+            // Scene Renderers
+            renderScene: (type) => {
+                Visuals.currentScene = type;
+            },
+
+            currentScene: 'hallway', // Default
+
+            loop: (timestamp) => {
+                Visuals.clear();
+                
+                // Global Pulse
+                const t = timestamp / 1000;
+                
+                if (Visuals.currentScene === 'red_light') {
+                    // RED HALLWAY
+                    Visuals.drawHallway('#300');
+                    // Red flashing overlay
+                    Visuals.ctx.fillStyle = `rgba(255, 0, 0, ${0.1 + Math.sin(t * 10) * 0.1})`;
+                    Visuals.ctx.fillRect(0, 0, Visuals.width, Visuals.height);
+                    // Glowing light at end
+                    Visuals.ctx.fillStyle = '#f00';
+                    Visuals.ctx.beginPath();
+                    Visuals.ctx.arc(Visuals.width/2, Visuals.height/2 - 10, 5 + Math.sin(t*20)*2, 0, Math.PI*2);
+                    Visuals.ctx.fill();
+
+                } else if (Visuals.currentScene === 'cat') {
+                    // DARK HALLWAY WITH EYES
+                    Visuals.drawHallway('#111');
+                    // Eyes
+                    const eyeOpen = Math.sin(t * 2) > 0; // Blink
+                    if (eyeOpen) {
+                        Visuals.ctx.fillStyle = '#ff0';
+                        Visuals.ctx.fillRect(Visuals.width/2 - 4, Visuals.height/2 + 10, 2, 2);
+                        Visuals.ctx.fillRect(Visuals.width/2 + 2, Visuals.height/2 + 10, 2, 2);
+                    }
+                    // Silhouette
+                    Visuals.ctx.fillStyle = '#000';
+                    Visuals.ctx.beginPath();
+                    Visuals.ctx.arc(Visuals.width/2, Visuals.height/2 + 15, 6, Math.PI, 0); // body
+                    Visuals.ctx.fill();
+
+                } else if (Visuals.currentScene === 'painting') {
+                    // WALL WITH FRAME
+                    Visuals.ctx.strokeStyle = '#333';
+                    Visuals.ctx.strokeRect(40, 20, 48, 40); // Frame
+                    // Face
+                    Visuals.ctx.fillStyle = '#222';
+                    Visuals.ctx.beginPath(); Visuals.ctx.arc(64, 40, 10, 0, Math.PI*2); Visuals.ctx.fill();
+                    // Blood Tears
+                    Visuals.ctx.fillStyle = '#800';
+                    const tearLen = (Math.sin(t) + 1) * 5;
+                    Visuals.ctx.fillRect(60, 42, 1, 5 + tearLen);
+                    Visuals.ctx.fillRect(68, 42, 1, 3 + tearLen);
+
+                } else if (Visuals.currentScene === 'chains') {
+                    Visuals.drawHallway('#222');
+                    // Swinging Chain
+                    const swing = Math.sin(t * 3) * 10;
+                    Visuals.ctx.strokeStyle = '#555';
+                    Visuals.ctx.beginPath();
+                    Visuals.ctx.moveTo(64, 0);
+                    Visuals.ctx.lineTo(64 + swing, 40);
+                    Visuals.ctx.stroke();
+                    // Hook
+                    Visuals.ctx.beginPath();
+                    Visuals.ctx.arc(64 + swing, 42, 2, 0, Math.PI*2);
+                    Visuals.ctx.stroke();
+
+                } else {
+                    // NORMAL
+                    Visuals.drawHallway('#222');
+                }
+
+                Visuals.noise();
+                requestAnimationFrame(Visuals.loop);
+            }
+        };
+
+        // --- 4. UI CONTROLLER ---
         window.UI = {
             toggleOnlineSetup: () => {
                 const el = document.getElementById('online-setup');
@@ -287,6 +450,7 @@
             showScreen: (id) => {
                 ['screen-menu', 'screen-role', 'screen-game'].forEach(s => document.getElementById(s).classList.add('hidden'));
                 document.getElementById(id).classList.remove('hidden');
+                if (id === 'screen-game') Visuals.init(); // Start visuals
             },
 
             renderRoles: () => {
@@ -306,6 +470,9 @@
                 const evt = Game.currentEvent;
                 const descEl = document.getElementById('event-desc');
                 
+                // Trigger Visual
+                Visuals.renderScene(evt.type);
+
                 // Animation reset
                 descEl.style.opacity = '0';
                 setTimeout(() => {
@@ -313,7 +480,7 @@
                     descEl.style.opacity = '1';
                 }, 200);
 
-                document.getElementById('round-indicator').innerText = Game.turn;
+                document.getElementById('round-display-sm').innerText = `R:${Game.turn}`;
                 document.getElementById('mini-rule-text').innerText = RULES[Math.floor(Math.random()*RULES.length)];
 
                 const container = document.getElementById('action-container');
@@ -410,7 +577,7 @@
             }
         };
 
-        // --- 4. GAME ENGINE ---
+        // --- 5. GAME ENGINE ---
         window.Game = {
             mode: 'OFFLINE',
             turn: 0,
