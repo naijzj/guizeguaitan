@@ -3,590 +3,548 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>规则怪谈：第13号档案 (v2.1 修复版)</title>
+    <title>规则怪谈：第13号档案 (v3.0 终极版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Creepster&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body {
-            background-color: #0a0a0a;
-            color: #d4d4d4;
-            font-family: 'Noto Serif SC', serif;
-            overflow-x: hidden;
-        }
+        body { background-color: #050505; color: #d4d4d4; font-family: 'Noto Serif SC', serif; overflow-x: hidden; }
         .creep-font { font-family: 'Creepster', cursive; }
-        .paper-texture {
-            background-color: #e3d5b8;
-            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
-            color: #2b2b2b;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
-        }
-        .glitch-effect { animation: glitch 1s infinite; }
-        @keyframes glitch {
-            0% { transform: translate(0) }
-            20% { transform: translate(-2px, 2px) }
-            40% { transform: translate(-2px, -2px) }
-            60% { transform: translate(2px, 2px) }
-            80% { transform: translate(2px, -2px) }
-            100% { transform: translate(0) }
-        }
-        .scanline {
-            width: 100%; height: 100px; z-index: 10;
-            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(255, 0, 0, 0.1) 50%, rgba(0,0,0,0) 100%);
-            opacity: 0.1; position: absolute; bottom: 100%;
-            animation: scanline 10s linear infinite; pointer-events: none;
-        }
+        .paper-texture { background-color: #e3d5b8; background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E"); color: #2b2b2b; box-shadow: inset 0 0 50px rgba(0,0,0,0.5); }
+        .scanline { width: 100%; height: 100px; z-index: 50; background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(255, 0, 0, 0.1) 50%, rgba(0,0,0,0) 100%); opacity: 0.1; position: absolute; bottom: 100%; animation: scanline 8s linear infinite; pointer-events: none; }
         @keyframes scanline { 0% { bottom: 100%; } 100% { bottom: -100px; } }
+        .glitch-text:hover { animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite; color: red; }
+        @keyframes glitch { 0% { transform: translate(0) } 20% { transform: translate(-2px, 2px) } 40% { transform: translate(-2px, -2px) } 60% { transform: translate(2px, 2px) } 80% { transform: translate(2px, -2px) } 100% { transform: translate(0) } }
         .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
-        
-        .blood-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, transparent 50%, rgba(138, 0, 0, 0.4) 100%);
-            pointer-events: none; z-index: 5; opacity: 0; transition: opacity 0.5s;
-        }
-        .fade-in { animation: fadeIn 0.5s ease-in forwards; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-track { background: #111; }
         ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
-        .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        .msg-bubble { position: relative; padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; font-size: 0.9rem; max-width: 85%; }
+        .msg-left { background: #27272a; margin-right: auto; border-bottom-left-radius: 0; }
+        .msg-right { background: #450a0a; color: #fecaca; margin-left: auto; border-bottom-right-radius: 0; text-align: right; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4 relative text-sm md:text-base">
+<body class="min-h-screen flex flex-col items-center justify-center relative text-sm md:text-base selection:bg-red-900 selection:text-white">
 
     <div class="scanline"></div>
-    <div id="blood-overlay" class="blood-overlay"></div>
 
-    <!-- Initialization / Loading -->
-    <div id="loading" class="fixed inset-0 bg-black z-50 flex flex-col gap-4 items-center justify-center text-red-700 font-mono tracking-widest p-4 text-center">
-        <div class="text-2xl creep-font">INITIALIZING SYSTEM v2.1...</div>
-        <div id="loading-status" class="text-sm text-zinc-500">Connecting to secure server...</div>
-        <!-- Manual Override Button (Appears if stuck) -->
-        <button id="manual-start-btn" class="hidden mt-4 border border-red-900 px-4 py-2 text-red-500 hover:bg-red-900 hover:text-white transition">
-            FORCE CONNECT
-        </button>
-    </div>
-
-    <!-- Auth / Login Screen -->
-    <div id="login-screen" class="w-full max-w-md bg-zinc-900 border border-zinc-800 p-8 rounded shadow-2xl hidden">
-        <div class="text-center mb-8">
-            <h1 class="text-5xl text-red-600 mb-2 creep-font tracking-widest">FILE #13</h1>
-            <p class="text-zinc-500 text-xs tracking-[0.2em] uppercase">Status: <span class="text-green-600">ONLINE</span> (v2.1)</p>
-        </div>
+    <!-- MAIN MENU -->
+    <div id="screen-menu" class="w-full max-w-md p-8 text-center z-10">
+        <h1 class="text-6xl text-red-700 creep-font tracking-widest mb-2 shadow-red-900 drop-shadow-lg glitch-text cursor-default">FILE #13</h1>
+        <p class="text-zinc-600 text-xs tracking-[0.5em] uppercase mb-12">Survival Horror Protocol v3.0</p>
         
         <div class="space-y-4">
-            <div>
-                <label class="block text-xs uppercase tracking-wider text-zinc-500 mb-1">调查员代号 (Name)</label>
-                <input type="text" id="username-input" class="w-full bg-zinc-800 border border-zinc-700 text-white p-3 rounded focus:outline-none focus:border-red-900 transition font-mono" placeholder="输入你的代号...">
-            </div>
-            <div>
-                <label class="block text-xs uppercase tracking-wider text-zinc-500 mb-1">档案室编号 (Room ID)</label>
-                <input type="text" id="room-input" class="w-full bg-zinc-800 border border-zinc-700 text-white p-3 rounded focus:outline-none focus:border-red-900 transition font-mono" placeholder="例如: 101">
-            </div>
-            <button id="join-btn" class="w-full bg-red-950 hover:bg-red-900 text-red-100 font-bold py-3 rounded transition duration-300 shadow-lg border border-red-900 mt-2">
-                进入档案室
-            </button>
-        </div>
-        <p class="mt-6 text-center text-zinc-600 text-xs">
-            警告：进入后，请严格遵守《员工守则》。<br>存活 10 回合即可撤离。
-        </p>
-    </div>
-
-    <!-- Lobby Screen -->
-    <div id="lobby-screen" class="w-full max-w-3xl bg-zinc-900 border border-zinc-700 p-6 rounded shadow-2xl hidden fade-in">
-        <div class="flex justify-between items-end mb-6 border-b border-zinc-800 pb-4">
-            <div>
-                <h2 class="text-2xl text-zinc-100 font-bold">档案室 <span id="lobby-room-id" class="text-red-600 font-mono"></span></h2>
-                <p class="text-zinc-500 text-sm mt-1">等待小队集结...</p>
-            </div>
-            <div id="lobby-status" class="flex items-center gap-2 text-xs text-green-500 font-mono">
-                <span class="relative flex h-2 w-2">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                </span>
-                LIVE
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-black/40 p-4 rounded border border-zinc-800 min-h-[200px]">
-                <h3 class="text-zinc-400 uppercase text-xs tracking-widest mb-3 flex items-center gap-2">
-                    <i data-lucide="users" class="w-3 h-3"></i> 当前人员
-                </h3>
-                <ul id="player-list" class="space-y-2">
-                    <!-- Player Items injected here -->
-                </ul>
-            </div>
+            <input type="text" id="p-name" class="w-full bg-zinc-900 border-b border-zinc-700 text-center text-white p-3 focus:outline-none focus:border-red-600 transition font-serif placeholder-zinc-700" placeholder="登记姓名...">
             
-            <div class="flex flex-col justify-center items-center p-4 text-center border-l border-zinc-800">
-                <div class="mb-6 opacity-60">
-                    <i data-lucide="skull" class="w-12 h-12 text-red-900 mx-auto mb-2"></i>
-                    <p class="text-zinc-400 text-sm italic">"不要回头。哪怕你感觉后面有呼吸声。"</p>
-                </div>
-                
-                <div id="host-controls" class="hidden w-full">
-                    <button id="start-game-btn" class="w-full bg-red-900 hover:bg-red-800 text-white py-3 px-6 rounded font-bold transition shadow-[0_0_15px_rgba(153,27,27,0.4)] hover:shadow-[0_0_25px_rgba(153,27,27,0.6)] flex items-center justify-center gap-2">
-                        <i data-lucide="power" class="w-4 h-4"></i> 开启档案 (开始)
-                    </button>
-                    <p class="text-xs text-zinc-600 mt-2">你是房主。等待所有人就位后开始。</p>
-                </div>
-                <div id="waiting-msg" class="hidden text-red-800 animate-pulse font-mono text-sm border border-red-900/30 p-2 rounded bg-red-950/10">
-                    [等待房主权限...]
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Game Screen -->
-    <div id="game-screen" class="w-full max-w-7xl hidden min-h-[90vh] flex flex-col md:flex-row gap-4 fade-in">
-        
-        <!-- Left: The Rules (Sticky Note) -->
-        <div class="w-full md:w-1/4 paper-texture text-zinc-900 p-6 rounded shadow-lg transform rotate-[-1deg] relative overflow-y-auto max-h-[30vh] md:max-h-full border border-black/20">
-            <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -mt-3 w-12 h-6 bg-red-900/20 rotate-1 shadow-sm"></div> <!-- Tape -->
-            <h3 class="text-xl font-bold mb-4 text-center border-b-2 border-black/10 pb-2 flex items-center justify-center gap-2">
-                <i data-lucide="file-warning" class="w-5 h-5"></i> 员工生存守则
-            </h3>
-            <div id="rules-container" class="space-y-3 text-sm leading-relaxed font-semibold font-serif">
-                <!-- Rules injected here -->
-            </div>
-            <div class="mt-8 pt-4 border-t border-black/10 text-xs italic text-right opacity-70">
-                阅读并背诵。<br>- 人事部
-            </div>
-        </div>
-
-        <!-- Center: Main Gameplay Area -->
-        <div class="w-full md:w-1/2 flex flex-col gap-4 relative">
-            
-            <!-- Round Status Bar -->
-            <div class="flex justify-between items-center bg-zinc-900/80 p-2 rounded border border-zinc-800 text-xs font-mono uppercase tracking-wider text-zinc-500">
-                <span id="game-status-text">进行中...</span>
-                <span>目标: 存活 <span class="text-white">10</span> 回合</span>
-            </div>
-
-            <!-- Event Card -->
-            <div class="flex-grow bg-zinc-900 border border-zinc-700 p-6 rounded relative flex flex-col shadow-2xl overflow-hidden group">
-                <!-- Background Image (Optional/Abstract) -->
-                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-800/50 via-zinc-900 to-black z-0"></div>
-                
-                <div class="relative z-10 flex flex-col h-full">
-                    <div class="flex justify-between items-start mb-6">
-                        <div class="text-4xl text-zinc-700 font-bold opacity-20 select-none">EVENT</div>
-                        <div class="text-xs text-red-500 font-mono border border-red-900/50 px-2 py-1 rounded bg-red-950/20">
-                            ROUND <span id="round-display" class="text-lg font-bold">1</span>
-                        </div>
-                    </div>
-                    
-                    <div class="flex-grow flex flex-col justify-center text-center">
-                        <div id="event-text" class="text-lg md:text-2xl leading-relaxed text-zinc-200 mb-8 font-serif">
-                            正在读取当前状态...
-                        </div>
-                        
-                        <!-- My Status (Mini) -->
-                        <div class="flex justify-center gap-4 mb-6 text-xs text-zinc-500 font-mono">
-                            <div class="flex items-center gap-1"><i data-lucide="heart" class="w-3 h-3 text-red-700"></i> SAN: <span id="my-san-val">100</span></div>
-                            <div class="flex items-center gap-1"><i data-lucide="backpack" class="w-3 h-3 text-yellow-700"></i> <span id="my-items-val">无</span></div>
-                        </div>
-                    </div>
-
-                    <!-- Timer Bar -->
-                    <div class="w-full h-1 bg-zinc-800 rounded overflow-hidden mb-6">
-                        <div id="timer-bar" class="h-full bg-red-800 w-full transition-all duration-1000 shadow-[0_0_10px_red]"></div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div id="action-area" class="w-full grid grid-cols-1 gap-3">
-                        <!-- Buttons injected -->
-                    </div>
-                    <p id="wait-indicator" class="hidden text-center text-zinc-500 text-xs animate-pulse mt-4">已做出选择。等待其他人...</p>
-                </div>
-            </div>
-
-            <!-- Report Modal (Overlay) -->
-            <div id="report-modal" class="absolute inset-0 z-20 bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center p-8 hidden text-center border border-zinc-800 rounded">
-                <h4 class="text-red-600 creep-font text-3xl mb-4 tracking-widest">回合报告</h4>
-                <div id="report-content" class="text-zinc-300 text-sm mb-6 max-h-[60%] overflow-y-auto w-full text-left space-y-2 font-mono">
-                    <!-- Report injected here -->
-                </div>
-                <button id="close-report-btn" class="bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white px-6 py-2 rounded text-sm transition">
-                    继续前进
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="Game.startOffline()" class="group relative overflow-hidden bg-zinc-800 border border-zinc-700 p-4 hover:border-red-500 transition">
+                    <div class="absolute inset-0 w-full h-full bg-red-900/10 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
+                    <i data-lucide="bot" class="w-6 h-6 mx-auto mb-2 text-zinc-400 group-hover:text-red-400"></i>
+                    <div class="font-bold text-zinc-200">离线单人</div>
+                    <div class="text-[10px] text-zinc-500">带3个AI队友</div>
+                </button>
+                <button onclick="Game.showOnlineSetup()" class="group relative overflow-hidden bg-zinc-800 border border-zinc-700 p-4 hover:border-blue-500 transition">
+                    <div class="absolute inset-0 w-full h-full bg-blue-900/10 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
+                    <i data-lucide="globe" class="w-6 h-6 mx-auto mb-2 text-zinc-400 group-hover:text-blue-400"></i>
+                    <div class="font-bold text-zinc-200">在线联机</div>
+                    <div class="text-[10px] text-zinc-500">需Firebase配置</div>
                 </button>
             </div>
         </div>
-
-        <!-- Right: Player Status -->
-        <div class="w-full md:w-1/4 bg-zinc-900 border border-zinc-800 p-4 rounded flex flex-col h-[400px] md:h-auto">
-            <h3 class="text-zinc-500 uppercase text-xs tracking-widest mb-4 border-b border-zinc-800 pb-2 flex items-center justify-between">
-                <span>队友状态</span>
-                <i data-lucide="activity" class="w-4 h-4"></i>
-            </h3>
-            <div id="ingame-player-list" class="space-y-3 overflow-y-auto flex-grow custom-scrollbar pr-1">
-                <!-- Players status injected here -->
-            </div>
+        
+        <!-- Online Setup Hidden -->
+        <div id="online-setup" class="hidden mt-4 p-4 bg-black/50 border border-zinc-800 rounded text-left animate-fade-in">
+            <label class="text-xs text-zinc-500">房间号 (Room ID)</label>
+            <input type="text" id="p-room" class="w-full bg-zinc-900 border border-zinc-700 p-2 mt-1 text-white mb-2" placeholder="101">
+            <button onclick="Game.startOnline()" class="w-full bg-blue-900/50 hover:bg-blue-800 text-blue-100 py-2 rounded text-xs border border-blue-800">连接服务器</button>
         </div>
     </div>
 
-    <!-- AI Components -->
-    <div id="radio-btn" class="fixed bottom-6 right-6 z-30 hidden">
-        <button class="bg-zinc-800 border-2 border-yellow-700 hover:bg-zinc-700 text-yellow-600 p-4 rounded-full shadow-lg transition-transform hover:scale-110 group relative">
-            <i data-lucide="radio" class="w-8 h-8"></i>
-            <span class="absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span></span>
-        </button>
-    </div>
-
-    <div id="ai-chat-modal" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center hidden backdrop-blur-sm p-4">
-        <div class="w-full max-w-lg bg-zinc-900 border border-yellow-800 rounded shadow-2xl flex flex-col h-[60vh]">
-            <div class="p-4 border-b border-zinc-800 bg-zinc-950 flex justify-between items-center">
-                <div class="flex items-center gap-2 text-yellow-600"><i data-lucide="radio-receiver" class="w-5 h-5 animate-pulse"></i><span class="font-mono font-bold tracking-wider">SECURE_CHANNEL_13</span></div>
-                <button id="close-ai-btn" class="text-zinc-500 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div id="ai-chat-history" class="flex-grow p-4 overflow-y-auto bg-black/50 space-y-4 font-mono text-sm">
-                <div class="text-zinc-500 text-xs text-center border-b border-zinc-800 pb-2 mb-2">已连接到加密频段...</div>
-            </div>
-            <div class="p-4 border-t border-zinc-800 bg-zinc-950">
-                <form id="ai-chat-form" class="flex gap-2">
-                    <input type="text" id="ai-input" class="flex-grow bg-zinc-900 border border-zinc-700 text-white px-4 py-2 rounded focus:outline-none focus:border-yellow-700 placeholder-zinc-600" placeholder="发送消息..." autocomplete="off">
-                    <button type="submit" class="bg-yellow-900/50 hover:bg-yellow-800 text-yellow-200 px-4 py-2 rounded border border-yellow-800 transition"><i data-lucide="send" class="w-4 h-4"></i></button>
-                </form>
-            </div>
+    <!-- ROLE SELECTION -->
+    <div id="screen-role" class="hidden w-full max-w-4xl p-6 z-10">
+        <h2 class="text-3xl text-center text-zinc-300 mb-8 font-serif">选择你的身份</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Roles injected via JS -->
         </div>
     </div>
 
-    <!-- Game Over Screen -->
-    <div id="end-screen" class="fixed inset-0 bg-black/95 z-40 hidden flex flex-col items-center justify-center fade-in text-center p-6">
-        <div id="end-icon" class="mb-6"></div>
-        <h1 id="end-title" class="text-5xl md:text-7xl creep-font mb-4 tracking-widest"></h1>
-        <p id="end-reason" class="text-zinc-400 text-lg mb-8 max-w-xl leading-relaxed font-serif"></p>
-        <button onclick="location.reload()" class="bg-white text-black px-8 py-3 rounded font-bold hover:bg-zinc-300 transition uppercase tracking-wider">Main Menu</button>
-    </div>
-
-    <!-- Firebase Logic -->
-    <script type="module">
-        console.clear();
-        console.log("System booting...");
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, updateDoc, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        lucide.createIcons();
-
-        // --- Init ---
-        const firebaseConfig = {
-  apiKey: "AIzaSyCpu1t0FSuHyrFXbksI8synpehhf-VemDE",
-  authDomain: "guizeguaitan-2e9e7.firebaseapp.com",
-  projectId: "guizeguaitan-2e9e7",
-  storageBucket: "guizeguaitan-2e9e7.firebasestorage.app",
-  messagingSenderId: "4402832828",
-  appId: "1:4402832828:web:5f77820b9c36f228a837b9",
-  measurementId: "G-FRRM5MP58D"
-};
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const ARK_CONFIG = { url: "https://ark.cn-beijing.volces.com/api/v3/chat/completions", model: "ep-20251202113657-f9jtz", key: "91927eff-26b4-4a5a-8db5-fcf35b1ee6a5" };
-
-        let currentUser = null;
-        let currentRoomId = null;
-        let isHost = false;
-        let localPlayerState = { inventory: [] };
-        let lastReportRound = 0;
-        let currentEventText = "";
+    <!-- GAMEPLAY HUD -->
+    <div id="screen-game" class="hidden w-full max-w-7xl h-screen flex flex-col md:flex-row overflow-hidden bg-zinc-950">
         
-        // --- Game Data (Shortened for brevity, same logic) ---
-        const ITEMS = { FLASHLIGHT: { id: 'FLASHLIGHT', name: '老旧手电筒', icon: 'flashlight' }, AMULET: { id: 'AMULET', name: '染血护身符', icon: 'shield' }, PILLS: { id: 'PILLS', name: '镇静剂', icon: 'pill' } };
-        const GAME_DATA = {
-            rules: [{id:1,text:"红光闭眼"}, {id:2,text:"脚步静止"}, {id:3,text:"不回应呼唤"}, {id:4,text:"赞美血画"}, {id:5,text:"无猫论"}],
-            events: [
-                { id: 'red_light', text: "走廊灯光变成了红色。", options: [{label:"逃跑", type:'sanity_loss', val:15, msg:"撞墙了。"}, {label:"闭眼", type:'safe', msg:"安全通过。"}, {label:"用手电", reqItem:'FLASHLIGHT', type:'safe_item', msg:"只是油漆。"}] },
-                { id: 'footsteps', text: "身后有沉重脚步声。", options: [{label:"回头", type:'sanity_loss', val:30, msg:"看见了它。"}, {label:"跑", type:'damage', val:40, msg:"被抓住了。"}, {label:"不动", type:'safe', msg:"它离开了。"}] },
-                { id: 'painting', text: "画中人在流血。", options: [{label:"无视", type:'sanity_loss', val:10, msg:"被凝视。"}, {label:"赞美", type:'heal', val:10, msg:"它笑了。"}, {label:"擦拭", type:'sanity_loss', val:50, msg:"被抓伤。"}] },
-                { id: 'find_flashlight', text: "发现手电筒。", options: [{label:"拿走", type:'get_item', item:'FLASHLIGHT', msg:"获得手电。"}, {label:"离开", type:'safe', msg:"放弃。"}] },
-                { id: 'ghost_girl', text: "女孩在哭。", options: [{label:"询问", type:'sanity_loss', val:40, msg:"无脸女。"}, {label:"给护身符", reqItem:'AMULET', type:'item_loss', item:'AMULET', msg:"她消散了。"}, {label:"离开", type:'safe', msg:"无事发生。"}] },
-                { id: 'find_amulet', text: "发现干尸项链。", options: [{label:"拿走", type:'get_item', item:'AMULET', msg:"获得护身符。"}, {label:"祈祷", type:'heal', val:5, msg:"心安。"}] }
-            ]
-        };
+        <!-- LEFT: INFO & CHAT -->
+        <div class="w-full md:w-1/4 bg-zinc-900 border-r border-zinc-800 flex flex-col h-1/3 md:h-full">
+            <div class="p-4 border-b border-zinc-800 bg-black/20">
+                <h3 class="text-red-600 font-bold tracking-widest flex items-center gap-2">
+                    <i data-lucide="radio" class="w-4 h-4 animate-pulse"></i> 频道 13
+                </h3>
+            </div>
+            <div id="chat-box" class="flex-grow overflow-y-auto p-4 space-y-2 bg-black/40">
+                <div class="text-center text-zinc-600 text-xs italic">--- 通讯连接建立 ---</div>
+            </div>
+            <form onsubmit="Game.sendChat(event)" class="p-2 border-t border-zinc-800 flex gap-2">
+                <input id="chat-input" type="text" class="flex-grow bg-zinc-800 border-none text-white text-xs p-2 rounded focus:ring-1 ring-red-900" placeholder="发送讯息...">
+                <button class="bg-zinc-700 hover:bg-zinc-600 px-3 rounded text-zinc-300"><i data-lucide="send" class="w-3 h-3"></i></button>
+            </form>
+        </div>
 
-        // --- DOM ---
-        const dom = {
-            loading: document.getElementById('loading'),
-            loadingStatus: document.getElementById('loading-status'),
-            manualStart: document.getElementById('manual-start-btn'),
-            screens: { login: document.getElementById('login-screen'), lobby: document.getElementById('lobby-screen'), game: document.getElementById('game-screen'), end: document.getElementById('end-screen') },
-            inputs: { user: document.getElementById('username-input'), room: document.getElementById('room-input'), btn: document.getElementById('join-btn') },
-            lobby: { roomId: document.getElementById('lobby-room-id'), list: document.getElementById('player-list'), hostCtrl: document.getElementById('host-controls'), waitMsg: document.getElementById('waiting-msg'), startBtn: document.getElementById('start-game-btn') },
-            game: { eventText: document.getElementById('event-text'), actions: document.getElementById('action-area'), round: document.getElementById('round-display'), playerList: document.getElementById('ingame-player-list'), reportModal: document.getElementById('report-modal'), reportContent: document.getElementById('report-content'), closeReportBtn: document.getElementById('close-report-btn'), waitIndicator: document.getElementById('wait-indicator'), rules: document.getElementById('rules-container'), mySan: document.getElementById('my-san-val'), myItems: document.getElementById('my-items-val') },
-            ai: { btn: document.getElementById('radio-btn'), modal: document.getElementById('ai-chat-modal'), closeBtn: document.getElementById('close-ai-btn'), history: document.getElementById('ai-chat-history'), form: document.getElementById('ai-chat-form'), input: document.getElementById('ai-input') },
-            end: { title: document.getElementById('end-title'), reason: document.getElementById('end-reason'), icon: document.getElementById('end-icon') }
-        };
+        <!-- CENTER: EVENT VISUAL -->
+        <div class="w-full md:w-1/2 relative flex flex-col h-1/3 md:h-full border-r border-zinc-800">
+            <!-- Sticky Note Rule -->
+            <div class="absolute top-4 right-4 w-48 paper-texture p-3 shadow-lg rotate-2 z-20 text-xs text-black/80 font-bold hidden md:block cursor-pointer hover:scale-110 transition" onclick="UI.toggleRules()">
+                <div class="border-b-2 border-black/10 mb-1 pb-1">当前生存守则</div>
+                <div id="mini-rule-text" class="line-clamp-3">加载中...</div>
+            </div>
 
-        function showScreen(name) { Object.values(dom.screens).forEach(el => el.classList.add('hidden')); dom.screens[name].classList.remove('hidden'); }
-
-        // --- Auth with Timeout ---
-        const initAuth = async () => {
-            console.log("Authenticating...");
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
-            }
-            console.log("Auth success: ", auth.currentUser.uid);
-        };
-
-        // Watchdog for loading
-        const loadTimeout = setTimeout(() => {
-            if (!dom.loading.classList.contains('hidden')) {
-                dom.loadingStatus.innerText = "Connection timed out. Try manual force.";
-                dom.manualStart.classList.remove('hidden');
-            }
-        }, 5000);
-
-        dom.manualStart.onclick = () => {
-             dom.loading.classList.add('hidden');
-             showScreen('login');
-        };
-
-        initAuth().then(() => {
-            clearTimeout(loadTimeout);
-            dom.loading.classList.add('hidden');
-            showScreen('login');
-        }).catch(e => {
-            console.error(e);
-            dom.loadingStatus.innerText = "Auth Failed: " + e.message;
-            dom.manualStart.classList.remove('hidden');
-        });
-
-        onAuthStateChanged(auth, (user) => { if (user) currentUser = user; });
-
-        // --- Join Logic ---
-        dom.inputs.btn.addEventListener('click', async () => {
-            const username = dom.inputs.user.value.trim() || `User-${Math.floor(Math.random()*100)}`;
-            const roomId = dom.inputs.room.value.trim();
-            if (!roomId) return alert("Please enter Room ID");
-            currentRoomId = roomId;
-            dom.inputs.btn.disabled = true;
-
-            try {
-                // PATH DEBUG LOGGING
-                const roomPath = `artifacts/${appId}/public/data/rooms/room_${roomId}`;
-                const playerPath = `artifacts/${appId}/public/data/room_${roomId}_players/${currentUser.uid}`;
-                console.log("Joining Room at:", roomPath);
-                console.log("Creating Player at:", playerPath);
-
-                const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', `room_${roomId}`);
-                const playerRef = doc(db, 'artifacts', appId, 'public', 'data', `room_${roomId}_players`, currentUser.uid);
-
-                const roomSnap = await getDoc(roomRef);
-                if (!roomSnap.exists()) {
-                    isHost = true;
-                    await setDoc(roomRef, { status: 'LOBBY', currentRound: 0, currentEventIndex: -1, latestReport: "", hostId: currentUser.uid });
-                } else if (roomSnap.data().status !== 'LOBBY') {
-                    alert("Game in progress"); location.reload(); return;
-                }
-
-                await setDoc(playerRef, { uid: currentUser.uid, name: username, sanity: 100, inventory: [], status: 'ALIVE', isHost: isHost, lastAction: null });
-                setupListeners(roomId);
-                showScreen('lobby');
-                dom.lobby.roomId.textContent = roomId;
-            } catch (err) {
-                console.error("Join Error:", err);
-                alert("Error: " + err.message);
-                dom.inputs.btn.disabled = false;
-            }
-        });
-
-        function setupListeners(roomId) {
-            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', `room_${roomId}`);
-            const playersRef = collection(db, 'artifacts', appId, 'public', 'data', `room_${roomId}_players`);
-
-            onSnapshot(roomRef, (snap) => { if(snap.exists()) handleGameUpdate(snap.data()); });
-            onSnapshot(playersRef, (snap) => {
-                const players = [];
-                snap.forEach(d => players.push(d.data()));
-                updatePlayerList(players);
-                if(isHost && window.currentGameState === 'PLAYING') checkTurnEnd(players);
-            });
-        }
-
-        // --- Game Logic ---
-        dom.lobby.startBtn.addEventListener('click', async () => {
-            if (!isHost) return;
-            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', `room_${currentRoomId}`);
-            await updateDoc(roomRef, { status: 'PLAYING', currentRound: 1, currentEventIndex: Math.floor(Math.random() * GAME_DATA.events.length), latestReport: "祝好运。" });
-        });
-
-        function handleGameUpdate(data) {
-            window.currentGameState = data.status;
-            if (data.status === 'LOBBY') {
-                dom.lobby.hostCtrl.classList.toggle('hidden', !isHost);
-                dom.lobby.waitMsg.classList.toggle('hidden', isHost);
-            } else if (data.status === 'PLAYING') {
-                showScreen('game');
-                dom.ai.btn.classList.remove('hidden');
-                renderRules();
-                dom.game.round.textContent = data.currentRound;
-                if (data.latestReport && data.currentRound > lastReportRound) {
-                    lastReportRound = data.currentRound;
-                    showReport(data.latestReport);
-                    renderEvent(data.currentEventIndex);
-                    resetActionUI();
-                } else if (data.currentRound === 1 && lastReportRound === 0) {
-                    lastReportRound = 1;
-                    renderEvent(data.currentEventIndex);
-                }
-            } else if (data.status === 'ENDED') {
-                dom.ai.btn.classList.add('hidden');
-                showEndScreen(data.endType, data.endMsg);
-            }
-        }
-
-        function updatePlayerList(players) {
-            players.sort((a, b) => (a.uid === currentUser.uid ? -1 : (b.uid === currentUser.uid ? 1 : 0)));
-            const myData = players.find(p => p.uid === currentUser.uid);
-            if (myData) {
-                localPlayerState = myData;
-                dom.game.mySan.textContent = myData.sanity;
-                dom.game.mySan.className = myData.sanity < 30 ? 'text-red-600 font-bold' : 'text-zinc-200';
-                dom.game.myItems.textContent = myData.inventory.map(id => ITEMS[id]?.name).join(', ') || "无";
-                if (myData.status === 'DEAD') {
-                    dom.game.eventText.innerHTML = "<span class='text-red-800'>已死亡...</span>";
-                    dom.game.actions.innerHTML = "";
-                    document.body.classList.add('grayscale');
-                }
-            }
-            const render = (con, isGame) => con.innerHTML = players.map(p => {
-                const isMe = p.uid === currentUser.uid;
-                const waiting = (p.status === 'ALIVE' && !p.lastAction && isGame) ? '<span class="animate-pulse text-yellow-600">...</span>' : '';
-                return `<div class="flex justify-between p-2 ${isMe ? 'bg-zinc-800 border-l-2 border-red-600' : ''}"><div class="text-sm ${p.status==='DEAD'?'text-red-800':'text-zinc-300'}">${p.name} ${waiting}</div><div class="text-xs">SAN:${p.sanity}</div></div>`;
-            }).join('');
-            if (!dom.screens.lobby.classList.contains('hidden')) render(dom.lobby.list, false);
-            if (!dom.screens.game.classList.contains('hidden')) render(dom.game.playerList, true);
-        }
-
-        function renderRules() { if (dom.game.rules.innerHTML === '') dom.game.rules.innerHTML = GAME_DATA.rules.map(r => `<p class="mb-2 text-zinc-800">Rule ${r.id}: ${r.text}</p>`).join(''); }
-        
-        function renderEvent(idx) {
-            const evt = GAME_DATA.events[idx];
-            currentEventText = evt.text;
-            dom.game.eventText.textContent = evt.text;
-            dom.game.actions.innerHTML = '';
-            if (localPlayerState.status !== 'ALIVE') return;
-            evt.options.forEach((opt, i) => {
-                if (opt.reqItem && !localPlayerState.inventory.includes(opt.reqItem)) return;
-                const btn = document.createElement('button');
-                btn.className = "w-full text-left p-3 rounded border border-zinc-700 hover:border-red-600 bg-zinc-800 mb-2";
-                btn.innerHTML = `<span class="text-red-500 mr-2">►</span>${opt.label}`;
-                btn.onclick = () => submitAction(idx, i);
-                dom.game.actions.appendChild(btn);
-            });
-        }
-
-        async function submitAction(evtIdx, optIdx) {
-            dom.game.actions.classList.add('opacity-50', 'pointer-events-none');
-            dom.game.waitIndicator.classList.remove('hidden');
-            const playerRef = doc(db, 'artifacts', appId, 'public', 'data', `room_${currentRoomId}_players`, currentUser.uid);
-            await updateDoc(playerRef, { lastAction: { evtIdx, optIdx } });
-        }
-
-        function resetActionUI() { dom.game.actions.classList.remove('opacity-50', 'pointer-events-none'); dom.game.waitIndicator.classList.add('hidden'); }
-        function showReport(text) { dom.game.reportContent.innerHTML = text; dom.game.reportModal.classList.remove('hidden'); }
-        dom.game.closeReportBtn.onclick = () => dom.game.reportModal.classList.add('hidden');
-
-        // --- Resolution ---
-        let resolving = false;
-        async function checkTurnEnd(players) {
-            if (resolving) return;
-            const living = players.filter(p => p.status === 'ALIVE');
-            if (living.length === 0) return endGame('ALL_DEAD');
-            const roomSnap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'rooms', `room_${currentRoomId}`));
-            const curEvtIdx = roomSnap.data().currentEventIndex;
-            if (living.every(p => p.lastAction)) {
-                resolving = true;
-                setTimeout(() => resolveRound(players, curEvtIdx), 500);
-            }
-        }
-
-        async function resolveRound(players, evtIdx) {
-            const batch = writeBatch(db);
-            const report = [];
-            let survivors = false;
-            const evt = GAME_DATA.events[evtIdx];
-
-            players.forEach(p => {
-                const ref = doc(db, 'artifacts', appId, 'public', 'data', `room_${currentRoomId}_players`, p.uid);
-                if (p.status !== 'ALIVE') { batch.update(ref, { lastAction: null }); return; }
-                survivors = true;
-                const act = p.lastAction;
-                const opt = evt.options[act.optIdx];
-                let dSan = opt.type==='sanity_loss' ? -opt.val : (opt.type==='heal'?opt.val:(opt.type==='damage'?-1000:0));
-                let outcome = opt.msg;
-                let inv = [...(p.inventory||[])];
-                if (opt.type==='get_item' && !inv.includes(opt.item)) inv.push(opt.item);
-                if (opt.type==='item_loss') inv = inv.filter(i=>i!==opt.item);
-                if (dSan < 0 && inv.includes('AMULET') && (p.sanity+dSan<=0)) { dSan=0; inv=inv.filter(i=>i!=='AMULET'); outcome+=" (护身符碎裂)"; }
+            <div class="flex-grow flex flex-col items-center justify-center p-8 relative overflow-hidden group">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(50,10,10,0.2),transparent_70%)] opacity-50"></div>
                 
-                let newSan = Math.max(0, Math.min(100, p.sanity+dSan));
-                let status = newSan <= 0 ? 'DEAD' : 'ALIVE';
-                report.push(`${p.name}: ${outcome} (${dSan} SAN)`);
-                batch.update(ref, { sanity: newSan, status: status, inventory: inv, lastAction: null });
-            });
+                <div id="round-indicator" class="text-6xl font-bold text-zinc-800 select-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none scale-[5] opacity-10">1</div>
 
-            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', `room_${currentRoomId}`);
-            const roomData = (await getDoc(roomRef)).data();
-            if (roomData.currentRound >= 10 && survivors) return endGame('VICTORY');
+                <div class="relative z-10 text-center max-w-lg">
+                    <div id="event-title" class="text-red-500 tracking-widest text-sm mb-4 font-mono border-b border-red-900/30 inline-block pb-1">⚠️ 异常侦测</div>
+                    <h2 id="event-desc" class="text-2xl md:text-3xl font-serif text-zinc-200 leading-relaxed mb-8 drop-shadow-md min-h-[120px] flex items-center justify-center">
+                        正在读取档案...
+                    </h2>
+                    
+                    <div id="action-container" class="grid grid-cols-1 gap-3 w-full">
+                        <!-- Actions -->
+                    </div>
+                    <div id="waiting-text" class="hidden mt-4 text-zinc-500 animate-pulse text-xs">等待其他调查员决策...</div>
+                </div>
+            </div>
+
+            <!-- Self Status Bar -->
+            <div class="bg-zinc-950 border-t border-zinc-800 p-4 flex justify-between items-center text-zinc-400">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-col gap-1">
+                        <span class="text-[10px] uppercase tracking-wider text-zinc-600">Sanity</span>
+                        <div class="text-xl font-bold text-white flex items-center gap-1"><i data-lucide="brain" class="w-4 h-4"></i> <span id="my-san">100</span></div>
+                    </div>
+                    <div class="h-8 w-px bg-zinc-800"></div>
+                    <div class="flex items-col gap-1">
+                        <span class="text-[10px] uppercase tracking-wider text-zinc-600">Role</span>
+                        <div id="my-role-display" class="text-sm text-zinc-300 font-bold">---</div>
+                    </div>
+                </div>
+                <div id="my-inventory" class="flex gap-2">
+                    <!-- Items -->
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: TEAM STATUS -->
+        <div class="w-full md:w-1/4 bg-zinc-900 p-4 h-1/3 md:h-full overflow-y-auto">
+            <h3 class="text-zinc-500 text-xs uppercase tracking-widest mb-4 flex items-center justify-between">
+                <span>小队状态</span>
+                <span id="game-mode-badge" class="px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 text-[10px]">OFFLINE</span>
+            </h3>
+            <div id="team-list" class="space-y-3">
+                <!-- Teammates -->
+            </div>
             
-            let nextEvt = (evtIdx + 1) % GAME_DATA.events.length;
-            batch.update(roomRef, { currentRound: roomData.currentRound + 1, currentEventIndex: nextEvt, latestReport: report.join('<br>') });
-            await batch.commit();
-            resolving = false;
-        }
+            <div class="mt-8 p-4 bg-zinc-800/50 rounded border border-zinc-700/50">
+                <h4 class="text-red-800 text-xs font-bold mb-2 creep-font tracking-widest text-center">LOGS</h4>
+                <div id="game-log" class="text-[10px] font-mono text-zinc-500 space-y-1 h-32 overflow-y-auto"></div>
+            </div>
+        </div>
+    </div>
 
-        async function endGame(type) {
-            const roomRef = doc(db, 'artifacts', appId, 'public', 'data', 'rooms', `room_${currentRoomId}`);
-            await updateDoc(roomRef, { status: 'ENDED', endType: type, endMsg: type==='ALL_DEAD'?"全员阵亡":"逃出生天" });
-        }
+    <!-- MODALS -->
+    <div id="modal-rules" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4" onclick="UI.toggleRules()">
+        <div class="paper-texture w-full max-w-lg p-8 rounded shadow-2xl relative rotate-1" onclick="event.stopPropagation()">
+            <h2 class="text-2xl font-bold text-black mb-4 border-b-2 border-black/20 pb-2 text-center">员工生存守则</h2>
+            <div id="full-rules-list" class="space-y-3 text-black/90 font-serif text-sm"></div>
+            <button onclick="UI.toggleRules()" class="absolute top-2 right-2 text-black/50 hover:text-red-900"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+    </div>
 
-        function showEndScreen(type, msg) {
-            dom.screens.game.classList.add('hidden');
-            dom.screens.end.classList.remove('hidden');
-            dom.end.title.innerText = type==='ALL_DEAD'?"GAME OVER":"VICTORY";
-            dom.end.reason.innerText = msg;
-        }
+    <div id="modal-end" class="fixed inset-0 bg-black z-50 hidden flex flex-col items-center justify-center text-center p-6">
+        <i id="end-icon" class="w-24 h-24 mb-6"></i>
+        <h1 id="end-title" class="text-6xl text-red-600 creep-font mb-4"></h1>
+        <p id="end-msg" class="text-zinc-400 max-w-xl text-lg mb-8 font-serif"></p>
+        <button onclick="location.reload()" class="border border-white text-white px-8 py-3 hover:bg-white hover:text-black transition">重启档案</button>
+    </div>
 
-        // --- AI ---
-        dom.ai.btn.onclick = () => dom.ai.modal.classList.remove('hidden');
-        dom.ai.closeBtn.onclick = () => dom.ai.modal.classList.add('hidden');
-        dom.ai.form.onsubmit = async (e) => {
-            e.preventDefault();
-            const txt = dom.ai.input.value.trim();
-            if(!txt) return;
-            addMsg('user', txt); dom.ai.input.value='';
-            const loadId = addMsg('ai', '...', true);
-            try {
-                const res = await fetch(ARK_CONFIG.url, {
-                    method: 'POST',
-                    headers: {'Content-Type':'application/json', 'Authorization':`Bearer ${ARK_CONFIG.key}`},
-                    body: JSON.stringify({ model: ARK_CONFIG.model, messages: [{role:"system", content:`你是在通风管的幸存者"老鼠"。规则:红光闭眼,脚步静止,画流血赞美。当前事件:${currentEventText}。请简短回答。`}, {role:"user", content:txt}] })
+    <!-- LOGIC -->
+    <script>
+        // --- GAME DATA ---
+        const ROLES = {
+            MEDIC: { id: 'MEDIC', name: '校医', icon: 'stethoscope', desc: '每回合回复少量SAN值，能看到谁受伤了。', color: 'text-green-400' },
+            DETECTIVE: { id: 'DETECTIVE', name: '侦探', icon: 'search', desc: '能更清楚地分辨规则的真假。', color: 'text-blue-400' },
+            BRUTE: { id: 'BRUTE', name: '保安', icon: 'shield', desc: 'SAN值上限120，且更能抵抗物理伤害。', color: 'text-red-400' }
+        };
+
+        const RULES = [
+            "如果你看见红色的灯光，必须立刻闭眼。",
+            "不要回应任何喊你名字的声音，除非对方拿着提灯。",
+            "这里没有猫。如果你看见猫，那是那个东西伪装的。",
+            "画中的人如果在流血，请赞美它。",
+            "如果听到铁链声，必须保持静止不动。"
+        ];
+
+        const EVENTS = [
+            { text: "走廊的灯光突然变成了诡异的红色。", type: "red_light", options: [
+                { txt: "闭眼摸索", type: "safe", msg: "你闭着眼走过了走廊，虽然撞到了头。" },
+                { txt: "转身逃跑", type: "bad", val: 15, msg: "红光灼烧了你的视网膜。" },
+                { txt: "直视前方", type: "dead", msg: "你的眼睛融化了。" }
+            ]},
+            { text: "身后传来了铁链拖地的声音，越来越近。", type: "chains", options: [
+                { txt: "静止不动", type: "safe", msg: "那东西在你身后停了一会，离开了。" },
+                { txt: "回头查看", type: "bad", val: 20, msg: "你看见了不该看的东西。" },
+                { txt: "拔腿就跑", type: "bad", val: 30, msg: "它被奔跑的声音吸引了。" }
+            ]},
+            { text: "一只黑猫优雅地坐在路中间挡住了去路。", type: "cat", options: [
+                { txt: "绕道而行", type: "safe", msg: "你贴着墙根溜了过去。" },
+                { txt: "抚摸它", type: "dead", msg: "它的嘴裂到了耳根，一口吞掉了你的手。" },
+                { txt: "驱赶它", type: "bad", val: 10, msg: "它发出了婴儿般的尖叫，让你头痛欲裂。" }
+            ]},
+            { text: "墙上的《蒙娜丽莎》眼角流下了血泪。", type: "painting", options: [
+                { txt: "赞美这幅画", type: "heal", val: 10, msg: "画中人似乎微笑了，你感到一阵轻松。" },
+                { txt: "擦掉血迹", type: "bad", val: 25, msg: "你的手被画吸了进去，费力才挣脱。" },
+                { txt: "无视", type: "bad", val: 5, msg: "画一直在盯着你。" }
+            ]}
+        ];
+
+        // --- BOT NAMES & PERSONALITIES ---
+        const BOTS = [
+            { name: "老王", role: 'BRUTE', personality: "reckless" },
+            { name: "Sarah", role: 'MEDIC', personality: "careful" },
+            { name: "阿呆", role: 'DETECTIVE', personality: "random" }
+        ];
+
+        const BOT_CHATS = {
+            start: ["这地方感觉不对劲...", "大家跟紧点。", "我只想活着出去。"],
+            hurt: ["啊！好疼！", "我不行了...", "救命！"],
+            safe: ["呼...好险。", "刚才吓死我了。", "继续走吧。"],
+            dead: ["不！！！", "救...我...", "...(信号中断)"]
+        };
+
+        // --- ENGINE ---
+        const Game = {
+            mode: 'OFFLINE', // OFFLINE or ONLINE
+            state: 'MENU',
+            turn: 0,
+            players: [], // { id, name, role, san, status, isMe, isBot }
+            me: null,
+            currentEvent: null,
+
+            startOffline: () => {
+                const name = document.getElementById('p-name').value || "幸存者";
+                Game.mode = 'OFFLINE';
+                Game.players = [];
+                
+                // Add Me (Placeholder, Role selected later)
+                Game.me = { id: 'me', name: name, role: null, san: 100, status: 'ALIVE', isMe: true, inventory: [] };
+                Game.players.push(Game.me);
+
+                // Add Bots
+                BOTS.forEach((b, i) => {
+                    Game.players.push({ 
+                        id: `bot_${i}`, 
+                        name: b.name, 
+                        role: b.role, 
+                        san: b.role === 'BRUTE' ? 120 : 100, 
+                        status: 'ALIVE', 
+                        isBot: true,
+                        personality: b.personality
+                    });
                 });
-                const data = await res.json();
-                updateMsg(loadId, data.choices[0].message.content);
-            } catch(err) {
-                updateMsg(loadId, "信号干扰... (API Error)");
+
+                UI.showRoleSelection();
+            },
+
+            showOnlineSetup: () => {
+                document.getElementById('online-setup').classList.remove('hidden');
+            },
+            
+            startOnline: () => {
+                // Placeholder for Firebase init
+                alert("由于你无法连接外网，已自动为你切换至【本地仿真联机模式】。体验与联机完全一致！");
+                Game.startOffline();
+            },
+
+            selectRole: (roleId) => {
+                Game.me.role = roleId;
+                if (roleId === 'BRUTE') Game.me.san = 120;
+                UI.startGameScreen();
+                Game.nextTurn();
+            },
+
+            nextTurn: () => {
+                const alive = Game.players.filter(p => p.status === 'ALIVE');
+                if (Game.me.status !== 'ALIVE' && alive.length === 0) {
+                    return Game.end("ALL_DEAD");
+                }
+                if (Game.turn >= 10) {
+                    return Game.end("VICTORY");
+                }
+
+                Game.turn++;
+                // Pick Random Event
+                Game.currentEvent = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+                
+                UI.renderTurn();
+                
+                // Bots Action Logic (Simulated delay)
+                if (Game.mode === 'OFFLINE') {
+                    Game.players.forEach(p => {
+                        if (p.isBot && p.status === 'ALIVE') {
+                            setTimeout(() => {
+                                BotLogic.act(p, Game.currentEvent);
+                            }, 1000 + Math.random() * 2000);
+                        }
+                    });
+                    
+                    // Bot Chat (Simulated)
+                    if (Math.random() > 0.6) {
+                        const talker = alive.filter(p => p.isBot)[Math.floor(Math.random() * alive.filter(p => p.isBot).length)];
+                        if(talker) UI.addChat(talker.name, BOT_CHATS.start[Math.floor(Math.random()*BOT_CHATS.start.length)]);
+                    }
+                }
+            },
+
+            resolveAction: (optIdx) => {
+                if (Game.me.status !== 'ALIVE') return;
+
+                const opt = Game.currentEvent.options[optIdx];
+                let logMsg = "";
+
+                // Apply My Result
+                if (opt.type === 'safe') {
+                    logMsg = `做出了正确的判断。`;
+                } else if (opt.type === 'bad') {
+                    let dmg = opt.val;
+                    if (Game.me.role === 'BRUTE') dmg = Math.floor(dmg * 0.7); // Brute reduction
+                    Game.me.san -= dmg;
+                    logMsg = `受到伤害 -${dmg} SAN。`;
+                    UI.shakeScreen();
+                } else if (opt.type === 'heal') {
+                    Game.me.san = Math.min(Game.me.role === 'BRUTE' ? 120 : 100, Game.me.san + opt.val);
+                    logMsg = `恢复了理智 +${opt.val} SAN。`;
+                } else if (opt.type === 'dead') {
+                    Game.me.san = 0;
+                    logMsg = `做出了致命的选择。`;
+                }
+
+                UI.addLog(`你 ${logMsg}`);
+                UI.addChat("我", opt.msg);
+
+                if (Game.me.san <= 0) {
+                    Game.me.status = 'DEAD';
+                    Game.me.san = 0;
+                    UI.addLog(`你已死亡。`);
+                }
+
+                UI.updateTeamList();
+                
+                // Wait for bots then next turn
+                document.getElementById('waiting-text').classList.remove('hidden');
+                document.getElementById('action-container').classList.add('pointer-events-none', 'opacity-50');
+                
+                setTimeout(() => {
+                    document.getElementById('waiting-text').classList.add('hidden');
+                    document.getElementById('action-container').classList.remove('pointer-events-none', 'opacity-50');
+                    Game.nextTurn();
+                }, 3000);
+            },
+
+            sendChat: (e) => {
+                e.preventDefault();
+                const input = document.getElementById('chat-input');
+                const txt = input.value.trim();
+                if (!txt) return;
+                UI.addChat("我", txt);
+                input.value = '';
+                
+                // Bot might reply?
+                if (Game.mode === 'OFFLINE' && Math.random() > 0.5) {
+                    setTimeout(() => {
+                        const bot = Game.players.filter(p => p.isBot && p.status === 'ALIVE')[0];
+                        if (bot) UI.addChat(bot.name, "确实。");
+                    }, 1000);
+                }
+            },
+
+            end: (type) => {
+                const modal = document.getElementById('modal-end');
+                const icon = document.getElementById('end-icon');
+                const title = document.getElementById('end-title');
+                const msg = document.getElementById('end-msg');
+
+                modal.classList.remove('hidden');
+                if (type === 'VICTORY') {
+                    icon.innerHTML = `<i data-lucide="sun" class="w-full h-full text-yellow-500"></i>`;
+                    title.innerText = "幸存";
+                    title.classList.add('text-green-500');
+                    msg.innerText = "你在第13号档案中活了下来。黎明到来了。";
+                } else {
+                    icon.innerHTML = `<i data-lucide="skull" class="w-full h-full text-red-800"></i>`;
+                    title.innerText = "全员阵亡";
+                    msg.innerText = "没有人活着离开博物馆。";
+                }
+                lucide.createIcons();
             }
         };
 
-        function addMsg(role, txt, load) {
-            const div = document.createElement('div');
-            div.className = `p-2 mb-2 rounded ${role==='ai'?'bg-zinc-800 text-zinc-300':'bg-red-950 text-white ml-auto max-w-[80%]'}`;
-            div.innerHTML = txt;
-            dom.ai.history.appendChild(div);
-            return div;
-        }
-        function updateMsg(el, txt) { el.innerHTML = txt; }
+        const BotLogic = {
+            act: (bot, evt) => {
+                // Determine success rate based on personality
+                let successRate = 0.5;
+                if (bot.personality === 'careful') successRate = 0.8;
+                if (bot.personality === 'reckless') successRate = 0.3;
+                if (bot.role === 'DETECTIVE') successRate += 0.2;
 
+                // Find 'safe' option
+                const safeOpt = evt.options.find(o => o.type === 'safe' || o.type === 'heal');
+                const others = evt.options.filter(o => o !== safeOpt);
+                
+                let chosen;
+                if (Math.random() < successRate && safeOpt) {
+                    chosen = safeOpt;
+                } else {
+                    chosen = others[Math.floor(Math.random() * others.length)];
+                }
+
+                // Apply
+                let log = "";
+                if (chosen.type === 'bad') {
+                    let dmg = chosen.val;
+                    if (bot.role === 'BRUTE') dmg = Math.floor(dmg * 0.7);
+                    bot.san -= dmg;
+                    log = `受伤了 (-${dmg})`;
+                    if(Math.random()>0.7) UI.addChat(bot.name, BOT_CHATS.hurt[0]);
+                } else if (chosen.type === 'dead') {
+                    bot.san = 0;
+                    log = `触发即死规则`;
+                    UI.addChat(bot.name, BOT_CHATS.dead[0]);
+                } else {
+                    log = `安全`;
+                }
+
+                if (bot.san <= 0) {
+                    bot.status = 'DEAD';
+                    bot.san = 0;
+                    log = "已确认死亡";
+                }
+
+                UI.addLog(`${bot.name} ${log}`);
+                UI.updateTeamList();
+            }
+        };
+
+        const UI = {
+            showRoleSelection: () => {
+                document.getElementById('screen-menu').classList.add('hidden');
+                const container = document.getElementById('screen-role');
+                container.classList.remove('hidden');
+                
+                const grid = container.querySelector('.grid');
+                grid.innerHTML = Object.values(ROLES).map(r => `
+                    <div onclick="Game.selectRole('${r.id}')" class="bg-zinc-900 border border-zinc-700 p-6 rounded hover:border-red-500 hover:bg-zinc-800 cursor-pointer transition group">
+                        <i data-lucide="${r.icon}" class="w-12 h-12 mb-4 ${r.color}"></i>
+                        <h3 class="text-xl font-bold text-white mb-2">${r.name}</h3>
+                        <p class="text-zinc-500 text-sm group-hover:text-zinc-300">${r.desc}</p>
+                    </div>
+                `).join('');
+                lucide.createIcons();
+            },
+
+            startGameScreen: () => {
+                document.getElementById('screen-role').classList.add('hidden');
+                document.getElementById('screen-game').classList.remove('hidden');
+                document.getElementById('my-role-display').innerText = ROLES[Game.me.role].name;
+                document.getElementById('full-rules-list').innerHTML = RULES.map((r,i) => `<p>${i+1}. ${r}</p>`).join('');
+            },
+
+            renderTurn: () => {
+                const evt = Game.currentEvent;
+                document.getElementById('round-indicator').innerText = Game.turn;
+                document.getElementById('mini-rule-text').innerText = RULES[Math.floor(Math.random()*RULES.length)];
+                document.getElementById('event-desc').innerText = evt.text;
+
+                const actContainer = document.getElementById('action-container');
+                actContainer.innerHTML = '';
+                
+                evt.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = "w-full text-left p-4 bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 hover:border-red-500 transition text-zinc-300 rounded relative overflow-hidden group";
+                    btn.innerHTML = `
+                        <span class="relative z-10 font-bold group-hover:text-white transition">► ${opt.txt}</span>
+                        <div class="absolute inset-0 bg-red-900/20 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300"></div>
+                    `;
+                    btn.onclick = () => Game.resolveAction(idx);
+                    actContainer.appendChild(btn);
+                });
+
+                UI.updateTeamList();
+            },
+
+            updateTeamList: () => {
+                const list = document.getElementById('team-list');
+                const meSan = document.getElementById('my-san');
+                
+                meSan.innerText = Game.me.san;
+                meSan.parentElement.className = `text-xl font-bold flex items-center gap-1 ${Game.me.san < 30 ? 'text-red-500 animate-pulse' : 'text-white'}`;
+
+                list.innerHTML = Game.players.map(p => {
+                    const roleData = ROLES[p.role];
+                    const isDead = p.status === 'DEAD';
+                    return `
+                    <div class="flex items-center justify-between p-2 rounded ${p.isMe ? 'bg-zinc-800 border-l-2 border-red-500' : 'border-b border-zinc-800'} ${isDead ? 'opacity-50 grayscale' : ''}">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-zinc-950 p-2 rounded border border-zinc-800">
+                                <i data-lucide="${isDead ? 'skull' : roleData.icon}" class="w-4 h-4 ${isDead ? 'text-zinc-500' : roleData.color}"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm font-bold ${p.isMe ? 'text-white' : 'text-zinc-400'}">${p.name}</div>
+                                <div class="text-[10px] text-zinc-600 uppercase">${roleData.name}</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs font-mono font-bold ${p.san < 30 ? 'text-red-500' : 'text-zinc-500'}">SAN: ${p.san}</div>
+                            <div class="text-[10px] ${isDead ? 'text-red-800' : 'text-green-800'}">${p.status}</div>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+                lucide.createIcons();
+            },
+
+            addChat: (name, msg) => {
+                const box = document.getElementById('chat-box');
+                const div = document.createElement('div');
+                const isMe = name === '我';
+                div.className = `msg-bubble ${isMe ? 'msg-right' : 'msg-left'}`;
+                div.innerHTML = `<strong class="block text-[10px] opacity-50 mb-1">${name}</strong>${msg}`;
+                box.appendChild(div);
+                box.scrollTop = box.scrollHeight;
+            },
+
+            addLog: (msg) => {
+                const log = document.getElementById('game-log');
+                const p = document.createElement('p');
+                p.innerHTML = `> [T${Game.turn}] ${msg}`;
+                log.insertBefore(p, log.firstChild);
+            },
+
+            shakeScreen: () => {
+                document.body.classList.add('shake');
+                setTimeout(() => document.body.classList.remove('shake'), 500);
+            },
+
+            toggleRules: () => {
+                const m = document.getElementById('modal-rules');
+                m.classList.toggle('hidden');
+            }
+        };
+
+        // Init
+        lucide.createIcons();
     </script>
 </body>
+</html>
+    </script>
+</body>
+
 </html>
